@@ -29,15 +29,39 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
     {
         super.onCreate(savedInstanceState);
 
-        openGLCameraSurface = new OpenGLCameraSurface(this);
-        openGLCameraRenderer = openGLCameraSurface.getRenderer();
-
-        setContentView(openGLCameraSurface);
-
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSIONS_KEY);
         }
+        else
+        {
+            startView();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+    {
+        if(requestCode == PERMISSIONS_KEY)
+        {
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                startView();
+            }
+            else
+            {
+                System.exit(0);
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    private void startView()
+    {
+        openGLCameraSurface = new OpenGLCameraSurface(this);
+        openGLCameraRenderer = openGLCameraSurface.getRenderer();
+
+        setContentView(openGLCameraSurface);
     }
 
     public void startCamera(int texture)

@@ -76,10 +76,10 @@ public class OpenGLCameraDrawing
     private short drawOrder[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
 
     static float textureVertices[] = { // in counterclockwise order:
-            1.0f,  1.0f,
-            1.0f,  0.0f,
-            0.0f,  1.0f,
-            0.0f,  0.0f
+            0.0f, 1.0f,
+            1.0f, 1.0f,
+            1.0f, 0.0f,
+            0.0f, 0.0f
     };
 
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
