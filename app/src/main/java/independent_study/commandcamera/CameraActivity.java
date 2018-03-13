@@ -79,13 +79,14 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
         }
         catch (IOException ioe)
         {
-            Log.w("MainActivity","CAM LAUNCH FAILED");
+            Log.w("CameraActivity","CAM LAUNCH FAILED");
         }
     }
 
     public void onFrameAvailable(SurfaceTexture surfaceTexture)
     {
         openGLCameraSurface.requestRender();
+        //NativeBridge.getInstance().runCameraOperations(camera.getParameters().getPreviewSize().height, camera.getParameters().getPreviewSize().width);
     }
 
     @Override
