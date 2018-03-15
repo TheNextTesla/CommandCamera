@@ -10,7 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @see "https://stackoverflow.com/questions/12519235/modifying-camera-output-using-surfacetexture-and-opengl#new-answer?newreg=30fb4db867854936807777c4920df9a8"
@@ -24,14 +28,25 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
     private OpenGLCameraSurface openGLCameraSurface;
     private OpenGLCameraRenderer openGLCameraRenderer;
 
+    private short[] recordingBuffer;
+    private int[] sharedRecordingOffset;
+    private ReentrantLock reentrantLock;
+    private ArrayList<String> recognitionLabels;
+    private RecordingThread recordingThread;
+    private RecognitionThread recognitionThread;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
 
+        recordingBuffer = new short[(int) (RecognitionThread.SAMPLE_RATE * RecognitionThread.SAMPLE_DURATION / 1000.0)];
+        reentrantLock = new ReentrantLock();
+        sharedRecordingOffset = new int[1];
+
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
         {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSIONS_KEY);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, PERMISSIONS_KEY);
         }
         else
         {
@@ -62,6 +77,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
         openGLCameraRenderer = openGLCameraSurface.getRenderer();
 
         setContentView(openGLCameraSurface);
+        startMicrophone();
     }
 
     public void startCamera(int texture)
@@ -81,6 +97,15 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
         {
             Log.w("CameraActivity","CAM LAUNCH FAILED");
         }
+    }
+
+    public void startMicrophone()
+    {
+        recordingThread = new RecordingThread(recordingBuffer, reentrantLock, sharedRecordingOffset);
+        recognitionThread = new RecognitionThread(recordingBuffer, this, reentrantLock, sharedRecordingOffset);
+
+        recordingThread.start();
+        recognitionThread.start();
     }
 
     public void onFrameAvailable(SurfaceTexture surfaceTexture)
