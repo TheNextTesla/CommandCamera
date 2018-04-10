@@ -33,6 +33,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
     private SurfaceTexture surfaceTexture;
     private OpenGLCameraSurface openGLCameraSurface;
     private OpenGLCameraRenderer openGLCameraRenderer;
+    private volatile boolean shouldTakePicture;
 
     private short[] recordingBuffer;
     private int[] sharedRecordingOffset;
@@ -46,6 +47,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        shouldTakePicture = false;
 
         recordingBuffer = new short[(int) (RecognitionThread.SAMPLE_RATE * RecognitionThread.SAMPLE_DURATION / 1000.0)];
         reentrantLock = new ReentrantLock();
@@ -122,15 +124,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
         {
             camera.setPreviewTexture(surfaceTexture);
             camera.startPreview();
-
-            camera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback()
-            {
-                @Override
-                public void onPreviewFrame(byte[] data, Camera camera)
-                {
-                    onPreviewFrameCamera(null);
-                }
-            });
         }
         catch (IOException ioe)
         {
@@ -147,9 +140,43 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
         recognitionThread.start();
     }
 
+    public void setShouldTakePicture()
+    {
+        shouldTakePicture = true;
+    }
+
     public void onFrameAvailable(SurfaceTexture surfaceTexture)
     {
         openGLCameraSurface.requestRender();
+
+        if(shouldTakePicture)
+        {
+            camera.takePicture(new Camera.ShutterCallback()
+                   {
+                       @Override
+                       public void onShutter()
+                       {
+                           Log.d("CameraActivity", "onShutter");
+                       }
+                   }, new Camera.PictureCallback()
+                   {
+                       @Override
+                       public void onPictureTaken(byte[] data, Camera camera)
+                       {
+                           Log.d("CameraActivity", "onPictureTakenA");
+                       }
+                   }, new Camera.PictureCallback()
+                   {
+                        @Override
+                        public void onPictureTaken(byte[] data, Camera camera)
+                        {
+                            Log.d("CameraActivity", "onPictureTakenB");
+                        }
+                   }
+            );
+            shouldTakePicture = false;
+        }
+
         //NativeBridge.getInstance().runCameraOperations(camera.getParameters().getPreviewSize().height, camera.getParameters().getPreviewSize().width);
         Log.d("CameraActivity", "onFrameAvailable");
     }

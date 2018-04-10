@@ -1,6 +1,7 @@
 package independent_study.commandcamera;
 
 import android.content.Context;
+import android.hardware.camera2.CameraCharacteristics;
 import android.util.Log;
 
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
@@ -29,6 +30,7 @@ public class RecognitionThread extends Thread
     private static final String SAMPLE_RATE_NAME = "decoded_sample_data:1";
     private static final String OUTPUT_SCORES_NAME = "labels_softmax";
 
+    private CameraActivity context;
     private TensorFlowInferenceInterface inferenceInterface;
     private ArrayList<String> labels;
     private ReentrantLock bufferLock;
@@ -38,9 +40,10 @@ public class RecognitionThread extends Thread
     private boolean pauseRecognition;
     private volatile boolean stopRecognition;
 
-    public RecognitionThread(short[] audioRecording, Context context, ArrayList<String> labels,
+    public RecognitionThread(short[] audioRecording, CameraActivity context, ArrayList<String> labels,
                              RecognizeCommands recognizeCommands, ReentrantLock bufferLock, int[] sharedOffset)
     {
+        this.context = context;
         this.audioRecording = audioRecording;
         this.bufferLock = bufferLock;
         this.sharedOffset = sharedOffset;
@@ -135,6 +138,12 @@ public class RecognitionThread extends Thread
 
             RecognizeCommands.RecognitionResult result = recognizeCommands.processLatestResults(outputScores, System.currentTimeMillis());
             Log.d("RecognitionThread", result.isNewCommand ? result.foundCommand : "None");
+
+            if(result.isNewCommand && result.foundCommand.equals("go"))
+            {
+                Log.d("RecognitionThread", "go Detected, taking Picture");
+                context.setShouldTakePicture();
+            }
 
             try
             {
