@@ -23,6 +23,12 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
 {
     private static final int PERMISSIONS_KEY = 308;
 
+    private static final long AVERAGE_WINDOW_DURATION_MS = 500;
+    private static final float DETECTION_THRESHOLD = 0.70f;
+    private static final int SUPPRESSION_MS = 1500;
+    private static final int MINIMUM_COUNT = 3;
+    private static final long MINIMUM_TIME_BETWEEN_SAMPLES_MS = 30;
+
     private Camera camera;
     private SurfaceTexture surfaceTexture;
     private OpenGLCameraSurface openGLCameraSurface;
@@ -34,6 +40,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
     private ArrayList<String> recognitionLabels;
     private RecordingThread recordingThread;
     private RecognitionThread recognitionThread;
+    private RecognizeCommands recognizeCommands;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -43,6 +50,30 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
         recordingBuffer = new short[(int) (RecognitionThread.SAMPLE_RATE * RecognitionThread.SAMPLE_DURATION / 1000.0)];
         reentrantLock = new ReentrantLock();
         sharedRecordingOffset = new int[1];
+        recognitionLabels = new ArrayList<>();
+
+        try
+        {
+            BufferedReader br = new BufferedReader(new InputStreamReader(this.getResources().openRawResource(R.raw.conv_actions_labels)));
+            String line;
+            while ((line = br.readLine()) != null)
+            {
+                recognitionLabels.add(line);
+                if (line.charAt(0) != '_')
+                {
+                    //displayedLabels.add(line.substring(0, 1).toUpperCase() + line.substring(1));
+                    Log.d("RecognitionThread", line.substring(0, 1).toUpperCase() + line.substring(1));
+                }
+            }
+            br.close();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Problem reading label file!", e);
+        }
+
+        recognizeCommands = new RecognizeCommands(recognitionLabels, AVERAGE_WINDOW_DURATION_MS, DETECTION_THRESHOLD,
+                SUPPRESSION_MS, MINIMUM_COUNT, MINIMUM_TIME_BETWEEN_SAMPLES_MS);
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
         {
@@ -87,11 +118,19 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
         openGLCameraRenderer.setSurface(surfaceTexture);
 
         camera = Camera.open();
-
         try
         {
             camera.setPreviewTexture(surfaceTexture);
             camera.startPreview();
+
+            camera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback()
+            {
+                @Override
+                public void onPreviewFrame(byte[] data, Camera camera)
+                {
+                    onPreviewFrameCamera(null);
+                }
+            });
         }
         catch (IOException ioe)
         {
@@ -102,7 +141,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
     public void startMicrophone()
     {
         recordingThread = new RecordingThread(recordingBuffer, reentrantLock, sharedRecordingOffset);
-        recognitionThread = new RecognitionThread(recordingBuffer, this, reentrantLock, sharedRecordingOffset);
+        recognitionThread = new RecognitionThread(recordingBuffer,this, recognitionLabels, recognizeCommands, reentrantLock, sharedRecordingOffset);
 
         recordingThread.start();
         recognitionThread.start();
@@ -112,6 +151,12 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
     {
         openGLCameraSurface.requestRender();
         //NativeBridge.getInstance().runCameraOperations(camera.getParameters().getPreviewSize().height, camera.getParameters().getPreviewSize().width);
+        Log.d("CameraActivity", "onFrameAvailable");
+    }
+
+    public void onPreviewFrameCamera(byte[] data)
+    {
+        Log.d("CameraActivity", "PreviewFrame");
     }
 
     @Override

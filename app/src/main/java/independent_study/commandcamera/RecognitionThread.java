@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -31,40 +32,21 @@ public class RecognitionThread extends Thread
     private TensorFlowInferenceInterface inferenceInterface;
     private ArrayList<String> labels;
     private ReentrantLock bufferLock;
+    private RecognizeCommands recognizeCommands;
     private short[] audioRecording;
     private int[] sharedOffset;
     private boolean pauseRecognition;
     private volatile boolean stopRecognition;
 
-    public RecognitionThread(short[] audioRecording, Context context,
-                             ReentrantLock bufferLock, int[] sharedOffset)
+    public RecognitionThread(short[] audioRecording, Context context, ArrayList<String> labels,
+                             RecognizeCommands recognizeCommands, ReentrantLock bufferLock, int[] sharedOffset)
     {
         this.audioRecording = audioRecording;
         this.bufferLock = bufferLock;
         this.sharedOffset = sharedOffset;
+        this.recognizeCommands = recognizeCommands;
+        this.labels = labels;
         pauseRecognition = false;
-
-        labels = new ArrayList<>();
-        try
-        {
-            String actualFilename = LABEL_FILENAME.split("file:///android_asset/")[1];
-            BufferedReader br = new BufferedReader(new InputStreamReader(context.getResources().openRawResource(R.raw.conv_actions_labels)));
-            String line;
-            while ((line = br.readLine()) != null)
-            {
-                labels.add(line);
-                if (line.charAt(0) != '_')
-                {
-                    //displayedLabels.add(line.substring(0, 1).toUpperCase() + line.substring(1));
-                    Log.d("RecognitionThread", line.substring(0, 1).toUpperCase() + line.substring(1));
-                }
-            }
-            br.close();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Problem reading label file!", e);
-        }
 
         //inferenceInterface = new TensorFlowInferenceInterface(context.getAssets(), MODEL_FILENAME);
         inferenceInterface = new TensorFlowInferenceInterface(context.getResources().openRawResource(R.raw.conv_actions_frozen));
@@ -110,6 +92,9 @@ public class RecognitionThread extends Thread
             inferenceInterface.run(outputScoresNames);
             inferenceInterface.fetch(OUTPUT_SCORES_NAME, outputScores);
 
+
+
+            /*
             long currentTime = System.currentTimeMillis();
             //TODO: Response to Sorting Identified Sounds
             Log.d("RecognitionThread", "Output: " + Arrays.toString(outputScores));
@@ -146,6 +131,10 @@ public class RecognitionThread extends Thread
             {
                 Log.d("RecognitionThread", "Result: " + labels.get(bestValueIndex));
             }
+            */
+
+            RecognizeCommands.RecognitionResult result = recognizeCommands.processLatestResults(outputScores, System.currentTimeMillis());
+            Log.d("RecognitionThread", result.isNewCommand ? result.foundCommand : "None");
 
             try
             {
