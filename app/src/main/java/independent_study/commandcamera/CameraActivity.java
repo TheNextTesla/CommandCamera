@@ -1,9 +1,11 @@
 package independent_study.commandcamera;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.graphics.SurfaceTexture;
+import android.media.AudioManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -151,6 +154,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
 
         if(shouldTakePicture)
         {
+            /*
             camera.takePicture(new Camera.ShutterCallback()
                    {
                        @Override
@@ -170,10 +174,43 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
                         @Override
                         public void onPictureTaken(byte[] data, Camera camera)
                         {
+                            new FileSaveTask(data).execute();
                             Log.d("CameraActivity", "onPictureTakenB");
+                            //camera.startPreview();
                         }
                    }
             );
+            */
+
+            camera.takePicture(new Camera.ShutterCallback()
+                               {
+                                    public void onShutter()
+                                    {
+                                        try
+                                        {
+                                            AudioManager mgr = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                                            mgr.playSoundEffect(AudioManager.FLAG_PLAY_SOUND);
+                                        }
+                                        catch (NullPointerException npe)
+                                        {
+                                            npe.printStackTrace();
+                                        }
+                                    }
+                               }, null ,new Camera.PictureCallback()
+                               {
+                                   @Override
+                                   public void onPictureTaken(byte[] data, Camera camera)
+                                   {
+                                       Log.d("CameraActivity", "onPictureTakenA");
+                                       new FileSaveTask(data).execute();
+                                       Log.d("CameraActivity", "onPictureTakenB");
+                                       camera.stopPreview();
+                                       camera.startPreview();
+                                       Log.d("CameraActivity", "onPictureTakenC");
+                                   }
+                               }
+            );
+
             shouldTakePicture = false;
         }
 
@@ -181,20 +218,41 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
         Log.d("CameraActivity", "onFrameAvailable");
     }
 
-    public void onPreviewFrameCamera(byte[] data)
+    @Override
+    public void onResume()
     {
-        Log.d("CameraActivity", "PreviewFrame");
+        if(camera != null)
+        {
+            try
+            {
+                camera.reconnect();
+                camera.startPreview();
+            }
+            catch (IOException ioe)
+            {
+                ioe.printStackTrace();
+            }
+        }
+        super.onResume();
     }
 
     @Override
     public void onPause()
     {
-        //TODO: Does this Kind of Lifecycle Work?
         if(camera != null)
         {
             camera.stopPreview();
-            camera.release();
         }
         super.onPause();
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        if(camera != null)
+        {
+            camera.release();
+        }
+        super.onDestroy();
     }
 }
