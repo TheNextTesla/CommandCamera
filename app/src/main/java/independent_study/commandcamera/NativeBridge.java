@@ -3,9 +3,9 @@ package independent_study.commandcamera;
 import java.lang.annotation.Native;
 
 /**
- * Created by Blaine Huey on 3/9/2018.
+ * Class for Interfacing With Native Code
+ * Not Using Any, Although I had Intended to Use This For Compression
  */
-
 public class NativeBridge
 {
     static

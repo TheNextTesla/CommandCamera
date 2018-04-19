@@ -25,7 +25,10 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 
-/** Reads in results from an instantaneous audio recognition model and smoothes them over time. */
+/**
+ * Reads in results from an instantaneous audio recognition model and smoothes them over time.
+ * -- Directly from TensorFlow Mobile Example Code
+ */
 public class RecognizeCommands {
   // Configuration settings.
   private List<String> labels = new ArrayList<String>();

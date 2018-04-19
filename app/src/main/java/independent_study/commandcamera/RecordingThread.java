@@ -9,9 +9,9 @@ import android.util.Log;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Created by Blaine Huey on 3/13/2018.
+ * Thread that Manages the Recording Operation
+ * Gets Bytes From Microphone and Stores it In Array
  */
-
 public class RecordingThread extends Thread
 {
     private static final int SAMPLE_RATE = 16000;
@@ -21,6 +21,13 @@ public class RecordingThread extends Thread
     private int[] sharedOffset;
     private volatile boolean shouldRecord;
 
+    /**
+     * Constructor for Recording Thread
+     * @param audioRecording - The short[] that the data is stored into
+     *                       With the intention of this array being shared with other threads
+     * @param bufferLock - Object Ensuring Consistent Usage Of Resources Between Threads
+     * @param sharedOffset - Cheap Way of Getting an Int Pointer to Share With Other Thread
+     */
     public RecordingThread(short[] audioRecording, ReentrantLock bufferLock, int[] sharedOffset)
     {
         this.audioRecording = audioRecording;
@@ -29,6 +36,9 @@ public class RecordingThread extends Thread
         shouldRecord = true;
     }
 
+    /**
+     * Runs Intended Operation on Thread
+     */
     @Override
     public void run()
     {
@@ -51,6 +61,7 @@ public class RecordingThread extends Thread
 
         record.startRecording();
 
+        //Loops, For As Long as the Thread is Instructed to
         while(shouldRecord)
         {
             int numberRead = record.read(audioBuffer, 0, audioBuffer.length);
@@ -76,6 +87,10 @@ public class RecordingThread extends Thread
         record.release();
     }
 
+    /**
+     * Tells the Thread to Stop It's Main Loop Operation
+     * Irreversibly Kills the Thread
+     */
     public void stopRecording()
     {
         shouldRecord = false;

@@ -12,6 +12,10 @@ import java.util.Locale;
 
 import static android.os.Environment.DIRECTORY_PICTURES;
 
+/**
+ * An Asynchronous Thread Task that Saves a Set of Bytes to Disk
+ * Assumes that the Byte[] Composes a Jpeg File
+ */
 public class FileSaveTask extends AsyncTask<Void, Void, Void>
 {
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmss", Locale.US);
@@ -25,11 +29,21 @@ public class FileSaveTask extends AsyncTask<Void, Void, Void>
 
     private byte[] bytes;
 
+    /**
+     * Simple Constructor for Providing Bytes to Be Saved
+     * @param bytes - Bytes to Be Saved
+     */
     public FileSaveTask(byte[] bytes)
     {
         this.bytes = bytes;
     }
 
+    /**
+     * After execute is run the external thread, this runs in the background
+     * Does the actual saving operation to disk
+     * @param voids - A 'Void' Object (Literally Does Nothing)
+     * @return A 'Void' Object (Literally Does Nothing)
+     */
     public Void doInBackground(Void... voids)
     {
         try
@@ -40,6 +54,7 @@ public class FileSaveTask extends AsyncTask<Void, Void, Void>
                 return null;
             }
 
+            //Verifies that the CommandCamera Picture Directory Exists
             if(directoryPictures.isDirectory() && directoryPictures.exists())
             {
                 if(!directoryCommandCamera.exists() || !directoryCommandCamera.isDirectory())
@@ -51,6 +66,7 @@ public class FileSaveTask extends AsyncTask<Void, Void, Void>
                 }
             }
 
+            //Actual Saving Operation of the File
             date.setTime(System.currentTimeMillis());
             String fileName = fileStart + sdf.format(date);
             File file = File.createTempFile(fileName, fileEnding, directoryCommandCamera);

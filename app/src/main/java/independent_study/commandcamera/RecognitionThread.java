@@ -15,9 +15,8 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Created by Blaine Huey on 3/13/2018.
+ * Thread that Searches Through an Array to Find Voice Commands
  */
-
 public class RecognitionThread extends Thread
 {
     static final int SAMPLE_RATE = 16000;
@@ -40,6 +39,15 @@ public class RecognitionThread extends Thread
     private boolean pauseRecognition;
     private volatile boolean stopRecognition;
 
+    /**
+     * Creates the Thread
+     * @param audioRecording - Shared Audio Recording Short[]
+     * @param context - Android Context
+     * @param labels - ArrayList of the Names Associated with Each Command
+     * @param recognizeCommands - Object to Pump Output of Recognition for Determining Significance
+     * @param bufferLock - Shared Resource Lock
+     * @param sharedOffset - Cheap Way of Getting an Int Pointer to Share With Recording Thread
+     */
     public RecognitionThread(short[] audioRecording, CameraActivity context, ArrayList<String> labels,
                              RecognizeCommands recognizeCommands, ReentrantLock bufferLock, int[] sharedOffset)
     {
@@ -51,11 +59,12 @@ public class RecognitionThread extends Thread
         this.labels = labels;
         pauseRecognition = false;
 
-        //inferenceInterface = new TensorFlowInferenceInterface(context.getAssets(), MODEL_FILENAME);
         inferenceInterface = new TensorFlowInferenceInterface(context.getResources().openRawResource(R.raw.conv_actions_frozen));
-        //inferenceInterface = new TensorFlowInferenceInterface(context.getAssets(), "conv_actions_frozen.pb");
     }
 
+    /**
+     * Runs Thread Loop Operation (Method Does NOT Loop)
+     */
     @Override
     public void run()
     {
@@ -88,53 +97,12 @@ public class RecognitionThread extends Thread
             {
                 floatInputBuffer[i] = inputBuffer[i] / 32767.0f;
             }
-            //Log.d("RecognizeThread", Arrays.toString(floatInputBuffer));
 
+            //Operations on the Model's Detection Algorithm
             inferenceInterface.feed(SAMPLE_RATE_NAME, sampleRateList);
             inferenceInterface.feed(INPUT_DATA_NAME, floatInputBuffer, RECORDING_LENGTH, 1);
             inferenceInterface.run(outputScoresNames);
             inferenceInterface.fetch(OUTPUT_SCORES_NAME, outputScores);
-
-
-
-            /*
-            long currentTime = System.currentTimeMillis();
-            //TODO: Response to Sorting Identified Sounds
-            Log.d("RecognitionThread", "Output: " + Arrays.toString(outputScores));
-
-            int bestValueIndex = 0;
-            float bestValue = outputScores[0];
-            for(int i = 0; i < outputScores.length; i++)
-            {
-                if(outputScores[i] > bestValue)
-                {
-                    bestValue = outputScores[i];
-                    bestValueIndex = i;
-                }
-            }
-
-            int secondBestIndex = 0;
-            float secondBestValue = 0;
-            for(int i = 0; i < outputScores.length; i++)
-            {
-                if(i == bestValueIndex)
-                    continue;
-                if(outputScores[i] > secondBestValue)
-                {
-                    secondBestIndex = i;
-                    secondBestValue = outputScores[i];
-                }
-            }
-
-            if(secondBestValue > 0.4)
-            {
-                Log.d("RecognitionThread", "New Result: " + labels.get(secondBestIndex));
-            }
-            else
-            {
-                Log.d("RecognitionThread", "Result: " + labels.get(bestValueIndex));
-            }
-            */
 
             RecognizeCommands.RecognitionResult result = recognizeCommands.processLatestResults(outputScores, System.currentTimeMillis());
             Log.d("RecognitionThread", result.isNewCommand ? result.foundCommand : "None");
@@ -156,11 +124,18 @@ public class RecognitionThread extends Thread
         }
     }
 
+    /**
+     * Pauses the Recognition of the Thread
+     * @param shouldPause - If Should Pause
+     */
     public void setPause(boolean shouldPause)
     {
         pauseRecognition = shouldPause;
     }
 
+    /**
+     * Stops the Main Loop of the Thread
+     */
     public void stopRecognition()
     {
         stopRecognition = true;

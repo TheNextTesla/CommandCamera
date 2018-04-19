@@ -9,24 +9,12 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 /**
- * Created by Blaine Huey on 3/5/2018.
+ * Class that Instructs OpenGL on How to Run
+ * Based off of :
+ *
  */
-
 public class OpenGLCameraDrawing
 {
-    /*
-    private final String vertexShaderCode =
-            "#extension GL_OES_EGL_image_external : require\n"+
-                    "attribute vec4 position;" +
-                    "attribute vec4 inputTextureCoordinate;" +
-                    "varying vec2 textureCoordinate;" +
-                    "void main()" +
-                    "{"+
-                    "gl_Position = position;"+
-                    "textureCoordinate = inputTextureCoordinate.xy;" +
-                    "}";
-    */
-
     private final String vertexShaderCode =
             "attribute vec4 position;" +
                     "attribute vec2 inputTextureCoordinate;" +
@@ -36,16 +24,6 @@ public class OpenGLCameraDrawing
                     "gl_Position = position;"+
                     "textureCoordinate = inputTextureCoordinate;" +
                     "}";
-
-    /*
-    private final String fragmentShaderCode =
-            "#extension GL_OES_EGL_image_external : require\n"+
-                    "precision mediump float;" +
-                    "uniform vec4 vColor;" +
-                    "void main() {" +
-                    "  gl_FragColor = vColor;" +
-                    "}";
-    */
 
     private final String fragmentShaderCode =
             "#extension GL_OES_EGL_image_external : require\n"+

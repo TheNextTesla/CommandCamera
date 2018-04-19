@@ -2,6 +2,7 @@ package independent_study.commandcamera;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.graphics.SurfaceTexture;
@@ -11,6 +12,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -51,6 +54,11 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
     {
         super.onCreate(savedInstanceState);
         shouldTakePicture = false;
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         recordingBuffer = new short[(int) (RecognitionThread.SAMPLE_RATE * RecognitionThread.SAMPLE_DURATION / 1000.0)];
         reentrantLock = new ReentrantLock();
@@ -154,34 +162,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
 
         if(shouldTakePicture)
         {
-            /*
-            camera.takePicture(new Camera.ShutterCallback()
-                   {
-                       @Override
-                       public void onShutter()
-                       {
-                           Log.d("CameraActivity", "onShutter");
-                       }
-                   }, new Camera.PictureCallback()
-                   {
-                       @Override
-                       public void onPictureTaken(byte[] data, Camera camera)
-                       {
-                           Log.d("CameraActivity", "onPictureTakenA");
-                       }
-                   }, new Camera.PictureCallback()
-                   {
-                        @Override
-                        public void onPictureTaken(byte[] data, Camera camera)
-                        {
-                            new FileSaveTask(data).execute();
-                            Log.d("CameraActivity", "onPictureTakenB");
-                            //camera.startPreview();
-                        }
-                   }
-            );
-            */
-
             camera.takePicture(new Camera.ShutterCallback()
                                {
                                     public void onShutter()
@@ -201,12 +181,10 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
                                    @Override
                                    public void onPictureTaken(byte[] data, Camera camera)
                                    {
-                                       Log.d("CameraActivity", "onPictureTakenA");
+                                       Log.d("CameraActivity", "onPictureTaken");
                                        new FileSaveTask(data).execute();
-                                       Log.d("CameraActivity", "onPictureTakenB");
                                        camera.stopPreview();
                                        camera.startPreview();
-                                       Log.d("CameraActivity", "onPictureTakenC");
                                    }
                                }
             );

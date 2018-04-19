@@ -1,18 +1,19 @@
 package independent_study.commandcamera;
 
-import android.app.Activity;
 import android.content.Context;
-import android.graphics.Camera;
 import android.opengl.GLSurfaceView;
 
 /**
- * Created by Blaine Huey on 3/2/2018.
+ * Simple Android GLSurfaceView that Utilizes GLCameraRenderer
  */
-
 public class OpenGLCameraSurface extends GLSurfaceView
 {
     private OpenGLCameraRenderer renderer;
 
+    /**
+     * Sets Up View Displaying Rendered Camera Info
+     * @param context - Android Context (Required for super)
+     */
     public OpenGLCameraSurface(Context context)
     {
         super(context);
@@ -24,6 +25,10 @@ public class OpenGLCameraSurface extends GLSurfaceView
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
+    /**
+     * Returns the Renderer State Variable for Use by Activity
+     * @return the Renderer State Variable for Use by Activity
+     */
     public OpenGLCameraRenderer getRenderer()
     {
         return renderer;

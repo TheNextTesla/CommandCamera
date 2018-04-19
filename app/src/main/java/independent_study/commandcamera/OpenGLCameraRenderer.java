@@ -10,9 +10,10 @@ import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.egl.EGLConfig;
 
 /**
- * Created by Blaine Huey on 3/5/2018.
+ * Class that Loads Camera Pixels into OpenGL
+ * Based off of :
+ *
  */
-
 public class OpenGLCameraRenderer implements GLSurfaceView.Renderer
 {
     private SurfaceTexture surfaceTexture;
