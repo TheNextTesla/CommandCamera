@@ -32,7 +32,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
     private static final long AVERAGE_WINDOW_DURATION_MS = 500;
     private static final float DETECTION_THRESHOLD = 0.70f;
     private static final int SUPPRESSION_MS = 1500;
-    private static final int MINIMUM_COUNT = 3;
+    private static final int MINIMUM_COUNT = 2; //3
     private static final long MINIMUM_TIME_BETWEEN_SAMPLES_MS = 30;
 
     private Camera camera;
