@@ -1,4 +1,4 @@
-package independent_study.commandcamera;
+package independent_study.commandcamera.audio;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;

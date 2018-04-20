@@ -1,26 +1,22 @@
-package independent_study.commandcamera;
+package independent_study.commandcamera.audio;
 
-import android.content.Context;
-import android.hardware.camera2.CameraCharacteristics;
 import android.util.Log;
 
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
+
+import independent_study.commandcamera.CameraActivity;
+import independent_study.commandcamera.R;
 
 /**
  * Thread that Searches Through an Array to Find Voice Commands
  */
 public class RecognitionThread extends Thread
 {
-    static final int SAMPLE_RATE = 16000;
-    static final int SAMPLE_DURATION = 1000;
+    public static final int SAMPLE_RATE = 16000;
+    public static final int SAMPLE_DURATION = 1000;
     private static final int RECORDING_LENGTH = (int) (SAMPLE_RATE * SAMPLE_DURATION / 1000);
     private static final long MINIMUM_TIME_BETWEEN_SAMPLES_MS = 30;
     private static final String LABEL_FILENAME = "file:///android_asset/conv_actions_labels.txt";

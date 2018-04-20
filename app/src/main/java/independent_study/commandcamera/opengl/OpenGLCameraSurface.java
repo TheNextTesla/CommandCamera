@@ -1,7 +1,10 @@
-package independent_study.commandcamera;
+package independent_study.commandcamera.opengl;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+
+import independent_study.commandcamera.CameraActivity;
+import independent_study.commandcamera.opengl.OpenGLCameraRenderer;
 
 /**
  * Simple Android GLSurfaceView that Utilizes GLCameraRenderer

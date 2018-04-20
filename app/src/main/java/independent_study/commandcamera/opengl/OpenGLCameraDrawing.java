@@ -1,4 +1,4 @@
-package independent_study.commandcamera;
+package independent_study.commandcamera.opengl;
 
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;

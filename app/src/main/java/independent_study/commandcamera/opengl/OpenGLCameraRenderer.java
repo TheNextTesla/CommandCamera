@@ -1,6 +1,5 @@
-package independent_study.commandcamera;
+package independent_study.commandcamera.opengl;
 
-import android.app.Activity;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
@@ -8,6 +7,9 @@ import android.opengl.GLSurfaceView;
 
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.egl.EGLConfig;
+
+import independent_study.commandcamera.CameraActivity;
+import independent_study.commandcamera.opengl.OpenGLCameraDrawing;
 
 /**
  * Class that Loads Camera Pixels into OpenGL

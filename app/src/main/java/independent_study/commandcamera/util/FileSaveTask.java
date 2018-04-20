@@ -1,4 +1,4 @@
-package independent_study.commandcamera;
+package independent_study.commandcamera.util;
 
 import android.os.AsyncTask;
 import android.os.Environment;

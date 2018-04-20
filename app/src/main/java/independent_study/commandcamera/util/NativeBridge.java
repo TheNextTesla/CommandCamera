@@ -1,6 +1,4 @@
-package independent_study.commandcamera;
-
-import java.lang.annotation.Native;
+package independent_study.commandcamera.util;
 
 /**
  * Class for Interfacing With Native Code

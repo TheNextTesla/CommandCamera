@@ -16,11 +16,17 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+
+import independent_study.commandcamera.audio.RecognitionThread;
+import independent_study.commandcamera.audio.RecognizeCommands;
+import independent_study.commandcamera.audio.RecordingThread;
+import independent_study.commandcamera.opengl.OpenGLCameraRenderer;
+import independent_study.commandcamera.opengl.OpenGLCameraSurface;
+import independent_study.commandcamera.util.FileSaveTask;
 
 /**
  * @see "https://stackoverflow.com/questions/12519235/modifying-camera-output-using-surfacetexture-and-opengl#new-answer?newreg=30fb4db867854936807777c4920df9a8"

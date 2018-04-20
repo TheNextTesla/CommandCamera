@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package independent_study.commandcamera;
+package independent_study.commandcamera.audio;
 
 import android.util.Log;
 import android.util.Pair;
