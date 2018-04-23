@@ -11,6 +11,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.SmsMessage;
 import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
@@ -26,14 +27,17 @@ import independent_study.commandcamera.audio.RecognizeCommands;
 import independent_study.commandcamera.audio.RecordingThread;
 import independent_study.commandcamera.opengl.OpenGLCameraRenderer;
 import independent_study.commandcamera.opengl.OpenGLCameraSurface;
+import independent_study.commandcamera.sms.BroadcastReceiverSMS;
+import independent_study.commandcamera.sms.ListenerSMS;
 import independent_study.commandcamera.util.FileSaveTask;
 
 /**
  * @see "https://stackoverflow.com/questions/12519235/modifying-camera-output-using-surfacetexture-and-opengl#new-answer?newreg=30fb4db867854936807777c4920df9a8"
  */
-public class CameraActivity extends AppCompatActivity implements SurfaceTexture.OnFrameAvailableListener
+public class CameraActivity extends AppCompatActivity implements SurfaceTexture.OnFrameAvailableListener, ListenerSMS
 {
     private static final int PERMISSIONS_KEY = 308;
+    private static final String SMS_ACTIVATION_KEY = "cheese";
 
     private static final long AVERAGE_WINDOW_DURATION_MS = 500;
     private static final float DETECTION_THRESHOLD = 0.70f;
@@ -45,6 +49,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
     private SurfaceTexture surfaceTexture;
     private OpenGLCameraSurface openGLCameraSurface;
     private OpenGLCameraRenderer openGLCameraRenderer;
+    private BroadcastReceiverSMS broadcastReceiverSMS;
     private volatile boolean shouldTakePicture;
 
     private short[] recordingBuffer;
@@ -65,6 +70,8 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        broadcastReceiverSMS = BroadcastReceiverSMS.getInstance();
+        broadcastReceiverSMS.addListener(this);
 
         recordingBuffer = new short[(int) (RecognitionThread.SAMPLE_RATE * RecognitionThread.SAMPLE_DURATION / 1000.0)];
         reentrantLock = new ReentrantLock();
@@ -119,6 +126,17 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    public void onSMSReceived(SmsMessage message)
+    {
+        if(message != null && message.getMessageBody().toLowerCase().contains(SMS_ACTIVATION_KEY)
+                && Math.abs(message.getTimestampMillis() - System.currentTimeMillis()) < 50000)
+        {
+            setShouldTakePicture();
+        }
+        Log.d("CameraActivity", "onSMSReceived");
     }
 
     private void startView()
@@ -199,7 +217,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
         }
 
         //NativeBridge.getInstance().runCameraOperations(camera.getParameters().getPreviewSize().height, camera.getParameters().getPreviewSize().width);
-        Log.d("CameraActivity", "onFrameAvailable");
+        //Log.d("CameraActivity", "onFrameAvailable");
     }
 
     @Override

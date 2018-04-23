@@ -5,7 +5,10 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.WRITE_SMS" />
 
     <!-- Tell the system this app requires OpenGL ES 2.0. -->
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
@@ -26,7 +29,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".sms.BroadcastReceiverSMS" android:exported="true" >
+        <receiver android:name=".sms.BroadcastReceiverSMS" android:exported="true" android:permission="android.permission.BROADCAST_SMS">
             <intent-filter android:priority="999" >
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
