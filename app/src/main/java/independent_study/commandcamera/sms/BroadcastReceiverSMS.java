@@ -35,7 +35,6 @@ public class BroadcastReceiverSMS extends BroadcastReceiver
         broadcastReceiverSMS = this;
     }
 
-
     public boolean addListener(ListenerSMS listenerSMS)
     {
         synchronized (listeners)

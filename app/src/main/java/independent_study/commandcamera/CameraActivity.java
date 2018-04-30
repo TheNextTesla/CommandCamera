@@ -103,7 +103,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceTexture.
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
         {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, PERMISSIONS_KEY);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.BROADCAST_SMS}, PERMISSIONS_KEY);
         }
         else
         {

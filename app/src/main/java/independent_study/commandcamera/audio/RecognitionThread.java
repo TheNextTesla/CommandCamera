@@ -106,7 +106,7 @@ public class RecognitionThread extends Thread
             if(result.isNewCommand && result.foundCommand.equals("go"))
             {
                 Log.d("RecognitionThread", "go Detected, taking Picture");
-                //context.setShouldTakePicture(); TODO: Add Again
+                context.setShouldTakePicture();
             }
 
             try
